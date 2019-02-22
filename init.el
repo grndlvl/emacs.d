@@ -41,27 +41,22 @@
   :config
   (load-theme 'monokai t))
 
-;; Add powerline
-(use-package powerline
+(use-package mode-icons
   :ensure t
   :config
-  (powerline-default-theme))
+  (mode-icons-mode))
 
-;; Add airline-themes
-(use-package airline-themes
-  :ensure t
+(use-package spaceline-config
+  :ensure spaceline
   :init
-  (setq powerline-utf-8-separator-left   #xe0b0
-    powerline-utf-8-separator-right      #xe0b2
-    airline-utf-glyph-separator-left     #xe0b0
-    airline-utf-glyph-separator-right    #xe0b2
-    airline-utf-glyph-subseparator-left  #xe0b1
-    airline-utf-glyph-subseparator-right #xe0b3
-    airline-utf-glyph-branch             #xe0a0
-    airline-utf-glyph-readonly           #xe0a2
-    airline-utf-glyph-linenumber         #xe0a1)
+  (setq powerline-default-separator 'wave
+        spaceline-workspace-numbers-unicode t
+        spaceline-window-numbers-unicode t
+        spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
   :config
-  (load-theme 'airline-powerlineish t))
+  (spaceline-spacemacs-theme)
+  (spaceline-helm-mode)
+  (spaceline-info-mode))
 
 ;; Display whitespace characters
 (use-package whitespace
@@ -131,6 +126,9 @@
     (kbd "C")   'neotree-change-root
     (kbd "I")   'neotree-hidden-file-toggle
     (kbd "q")   'neotree-hide))
+
+(use-package magit
+  :ensure t)
 
 ;;----------------------------------------------------------------------------
 ;; Software development
