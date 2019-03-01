@@ -27,25 +27,41 @@
   :config
   (evil-mode t))
 
+;; Make term buffers act correctly
+(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region (point-min) (point-max))))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+
 ;;----------------------------------------------------------------------------
 ;; Look and feel
 ;;----------------------------------------------------------------------------
 
+;; Don't show the window mess
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (toggle-scroll-bar -1)
+;; No audio bell
+(setq visible-bell t)
+;; No startup screen
+(setq inhibit-startup-screen t)
 
 ;; Add theme
-(use-package monokai-theme
+(use-package doom-themes
   :ensure t
   :config
-  (load-theme 'monokai t))
+  (load-theme 'doom-molokai t)
+  (doom-themes-visual-bell-config)
+  ;;(doom-themes-neotree-config)
+  (doom-themes-org-config))
 
 (use-package mode-icons
   :ensure t
   :config
   (mode-icons-mode))
 
+;; Modeline
 (use-package spaceline-config
   :ensure spaceline
   :init
@@ -66,7 +82,6 @@
     '(face
       empty
       trailing
-      lines-tail
       tabs
       spaces))
   :config
@@ -80,7 +95,7 @@
   (setq
     fci-rule-width 5
     fci-rule-color "#3c3d37")
-  (add-hook 'after-change-major-mode-hook 'fci-mode))
+  (add-hook 'prog-mode-hook 'fci-mode))
 
 ;; Relative line numbers
 (use-package linum-relative
@@ -100,7 +115,8 @@
   :init
   (setq
     helm-autoresize-mode t
-    helm-buffers-fuzzy-matching t)
+    helm-buffers-fuzzy-matching t
+    helm-buffer-max-length nil)
   :bind
   (("M-x" . helm-M-x)
    ("C-x C-f" . helm-find-files)
@@ -130,9 +146,21 @@
 (use-package magit
   :ensure t)
 
+(use-package projectile
+  :ensure t
+  :init
+  (setq projectile-project-search-path '("~/Projects/"))
+  :config
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (projectile-mode +1))
+
+
 ;;----------------------------------------------------------------------------
 ;; Software development
 ;;----------------------------------------------------------------------------
+
+(use-package company
+  :ensure t)
 
 (use-package drupal-mode
   :ensure t)
@@ -140,3 +168,35 @@
 (use-package php-mode
   :ensure t
   :mode ("\\.php\\'" . php-mode))
+
+(use-package company-php
+  :ensure t)
+
+(use-package auto-complete
+  :ensure t)
+
+(use-package ac-php
+  :ensure t
+  :config
+  (add-hook 'php-mode-hook
+    '(lambda ()
+	(require 'company-php)
+        (company-mode t)
+        (ac-php-core-eldoc-setup)
+        (make-local-variable 'company-backends)
+        (define-key php-mode-map [remap evil-jump-to-tag] 'ac-php-find-symbol-at-point)
+        (add-to-list 'company-backends 'company-ac-php-backend))))
+
+(use-package markdown-mode
+  :ensure t)
+
+;; Treat "_" as part of the word!
+(add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
+
+;;----------------------------------------------------------------------------
+;; Miscellaneous
+;;----------------------------------------------------------------------------
+
+(use-package org
+  :ensure t
+  :init (setq org-log-done 'time))
