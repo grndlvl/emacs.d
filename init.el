@@ -83,7 +83,9 @@
       empty
       trailing
       tabs
-      spaces))
+      tab-mark
+      spaces
+      ))
   :config
   (global-whitespace-mode))
 
@@ -159,39 +161,54 @@
 ;; Software development
 ;;----------------------------------------------------------------------------
 
-(use-package company
-  :ensure t)
+;; Treat "_" as part of the word!
+(add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 
-(use-package drupal-mode
-  :ensure t)
+;; Auto complete framework
+(use-package company
+  :ensure t
+  :init
+  ;; Fix fci-mode when used in conjunction with company-mode.
+  ;; https://github.com/company-mode/company-mode/issues/180#issuecomment-55047120
+  (defvar-local company-fci-mode-on-p nil)
+
+  (defun company-turn-off-fci (&rest ignore)
+    (when (boundp 'fci-mode)
+      (setq company-fci-mode-on-p fci-mode)
+      (when fci-mode (fci-mode -1))))
+
+  (defun company-maybe-turn-on-fci (&rest ignore)
+    (when company-fci-mode-on-p (fci-mode 1)))
+  :config
+  (add-hook 'company-completion-started-hook 'company-turn-off-fci)
+  (add-hook 'company-completion-finished-hook 'company-maybe-turn-on-fci)
+  (add-hook 'company-completion-cancelled-hook 'company-maybe-turn-on-fci))
 
 (use-package php-mode
   :ensure t
   :mode ("\\.php\\'" . php-mode))
 
+(use-package drupal-mode
+  :ensure t)
+
 (use-package company-php
   :ensure t)
 
-(use-package auto-complete
-  :ensure t)
-
+;; PHP autocomplete with company
 (use-package ac-php
   :ensure t
   :config
   (add-hook 'php-mode-hook
     '(lambda ()
-	(require 'company-php)
-        (company-mode t)
-        (ac-php-core-eldoc-setup)
-        (make-local-variable 'company-backends)
-        (define-key php-mode-map [remap evil-jump-to-tag] 'ac-php-find-symbol-at-point)
-        (add-to-list 'company-backends 'company-ac-php-backend))))
+       (require 'company-php)
+         (company-mode t)
+         (ac-php-core-eldoc-setup)
+         (make-local-variable 'company-backends)
+         (define-key php-mode-map [remap evil-jump-to-tag] 'ac-php-find-symbol-at-point)
+         (add-to-list 'company-backends 'company-ac-php-backend))))
 
 (use-package markdown-mode
   :ensure t)
-
-;; Treat "_" as part of the word!
-(add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 
 ;;----------------------------------------------------------------------------
 ;; Miscellaneous
