@@ -28,6 +28,7 @@
   (evil-mode t))
 
 ;; Make term buffers act correctly
+;; @see https://stackoverflow.com/questions/13397737/ansi-coloring-in-compilation-mode
 (require 'ansi-color)
 (defun colorize-compilation-buffer ()
   (let ((inhibit-read-only t))
@@ -168,8 +169,8 @@
 (use-package company
   :ensure t
   :init
-  ;; Fix fci-mode when used in conjunction with company-mode.
-  ;; https://github.com/company-mode/company-mode/issues/180#issuecomment-55047120
+  ;; Fix fci-mode when used in conjunction with company-mode
+  ;; @see https://github.com/company-mode/company-mode/issues/180#issuecomment-55047120
   (defvar-local company-fci-mode-on-p nil)
 
   (defun company-turn-off-fci (&rest ignore)
